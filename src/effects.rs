@@ -192,7 +192,7 @@ pub(crate) fn add_effect<T: StatTrait>(
 }
 
 pub(crate) fn remove_effect<T: StatTrait>(
-    trigger: Trigger<RemoveEffect>,
+    trigger: On<RemoveEffect>,
     mut breached_writer: MessageWriter<OnBoundsBreached<T>>,
     mut removed_writer: MessageWriter<OnEffectRemoved>,
     mut effects_entities_query: Query<(&mut ActiveEffects<T>, &mut ActiveTags)>,

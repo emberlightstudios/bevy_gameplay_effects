@@ -151,7 +151,7 @@ mod tests {
         let health = stats.get(MyStats::Health).current_value;
         assert_eq!(health, 0.);
 
-        let events = app.world_mut().resource_mut::<Events<OnBoundsBreached<MyStats>>>();
+        let events = app.world_mut().resource_mut::<Messages<OnBoundsBreached<MyStats>>>();
         let mut cursor = events.get_cursor();
         let mut events = cursor.read(&events);
         assert_eq!(events.len(), 1);
@@ -193,7 +193,7 @@ mod tests {
         let health = stats.get(MyStats::Health).current_value;
         assert_eq!(health, 150.);
 
-        let events = app.world_mut().resource_mut::<Events<OnBoundsBreached<MyStats>>>();
+        let events = app.world_mut().resource_mut::<Messages<OnBoundsBreached<MyStats>>>();
         let mut cursor = events.get_cursor();
         let mut events = cursor.read(&events);
         assert_eq!(events.len(), 1);
@@ -299,13 +299,13 @@ mod tests {
             let (_, stats, _) = query.iter(app.world_mut()).next().unwrap();
             let health = stats.get(MyStats::Health).current_value;
             assert_eq!(health, 100. + (10. * i as f32));
-            let events = app.world_mut().resource_mut::<Events<OnRepeatingEffectTriggered>>();
+            let events = app.world_mut().resource_mut::<Messages<OnRepeatingEffectTriggered>>();
             let mut cursor = events.get_cursor();
             let events = cursor.read(&events);
             assert!(events.len() >= 1);
         }
 
-        let events = app.world_mut().resource_mut::<Events<OnRepeatingEffectTriggered>>();
+        let events = app.world_mut().resource_mut::<Messages<OnRepeatingEffectTriggered>>();
         let mut cursor = events.get_cursor();
         let event = cursor.read(&events).next().unwrap();
         assert_eq!(event.target_entity, entity);
@@ -343,7 +343,7 @@ mod tests {
             Some(entity2)
         )));
 
-        let events = app.world_mut().resource_mut::<Events<OnEffectAdded>>();
+        let events = app.world_mut().resource_mut::<Messages<OnEffectAdded>>();
         let mut cursor = events.get_cursor();
         let mut events = cursor.read(&events);
         assert_eq!(events.len(), 1);
