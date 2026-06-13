@@ -28,6 +28,9 @@ pub enum EffectCalculation {
     UpperBound,
 }
 
+/// How an effect magnitude scales with a given stat.
+/// The Formula is shift + multiplier * (stat - stat_offset) ^ exponent,
+/// clamped between min and max.
 #[derive(Clone, PartialEq)]
 pub struct StatScalingParams {
     pub shift: f32,

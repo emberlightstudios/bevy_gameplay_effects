@@ -20,7 +20,6 @@ stats! (
     }
 );
 
-
 #[derive(Resource)]
 struct Tags {
     #[allow(dead_code)]
@@ -99,9 +98,10 @@ fn spawn_entities(mut commands: Commands) {
 fn do_some_effects(
     mut commands: Commands,
     entities: Query<Entity, With<ActiveEffects<CharacterStats>>>,
+    tags: Res<Tags>,
 ) {
     let damage_effect = GameplayEffect::new(
-        None,
+        Some(tags.on_fire_tag),
         CharacterStats::Health,
         EffectMagnitude::LocalStat(CharacterStats::Strength, StatScalingParams{multiplier: -1.0, ..default()}),
         EffectCalculation::Additive,
