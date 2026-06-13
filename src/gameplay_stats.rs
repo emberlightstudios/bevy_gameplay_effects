@@ -1,5 +1,5 @@
-use std::marker::PhantomData;
 use bevy::prelude::Component;
+use std::marker::PhantomData;
 
 pub(crate) const STAT_LIMIT: usize = 16;
 
@@ -12,7 +12,11 @@ pub struct GameplayStat {
 
 impl GameplayStat {
     pub fn new(base_value: f32, current_value: f32) -> Self {
-        Self { base_value, current_value, modified_base: base_value }
+        Self {
+            base_value,
+            current_value,
+            modified_base: base_value,
+        }
     }
 }
 
@@ -40,7 +44,6 @@ impl<T: StatTrait> GameplayStats<T> {
         instance
     }
 
-
     pub fn get(&self, stat_variant: T) -> &GameplayStat {
         &self.0[stat_variant.into() as usize]
     }
@@ -54,4 +57,3 @@ impl<T: StatTrait> GameplayStats<T> {
         self.0[stat_variant.into() as usize] = stat;
     }
 }
-

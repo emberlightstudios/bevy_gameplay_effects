@@ -1,6 +1,6 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_hierarchical_tags::TagId;
-use crate::prelude::*;
 
 #[derive(Clone)]
 pub struct AddEffectData<T: StatTrait> {
@@ -10,8 +10,16 @@ pub struct AddEffectData<T: StatTrait> {
 }
 
 impl<T: StatTrait> AddEffectData<T> {
-    pub fn new(target_entity: Entity, effect: GameplayEffect<T>, source_entity: Option<Entity>) -> Self {
-        Self { effect, target_entity, source_entity }
+    pub fn new(
+        target_entity: Entity,
+        effect: GameplayEffect<T>,
+        source_entity: Option<Entity>,
+    ) -> Self {
+        Self {
+            effect,
+            target_entity,
+            source_entity,
+        }
     }
 }
 
@@ -23,7 +31,11 @@ pub struct EffectMetadata {
 
 impl EffectMetadata {
     pub fn new(target_entity: Entity, tag: Option<TagId>, source_entity: Option<Entity>) -> Self {
-        Self { source_entity, target_entity, tag }
+        Self {
+            source_entity,
+            target_entity,
+            tag,
+        }
     }
 }
 
@@ -35,7 +47,11 @@ pub struct BoundsBreachedMetadata<T> {
 
 impl<T: StatTrait> BoundsBreachedMetadata<T> {
     pub fn new(entity: Entity, stat: T, bound: EffectCalculation) -> Self {
-        Self { target_entity: entity, stat, bound }
+        Self {
+            target_entity: entity,
+            stat,
+            bound,
+        }
     }
 }
 
