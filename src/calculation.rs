@@ -115,7 +115,7 @@ pub(crate) fn apply_immediate<T: StatTrait>(
 #[inline]
 pub(crate) fn recalculate_stats<T: StatTrait>(
     entity: Entity,
-    effects: &Mut<ActiveEffects<T>>,
+    effects: &ActiveEffects<T>,
     stat_target: T,
     stats_query: &mut Query<&mut GameplayStats<T>>,
 ) -> Option<OnBoundsBreached<T>> {
@@ -219,17 +219,11 @@ pub(crate) fn get_bounds<T: StatTrait>(
 pub(crate) fn get_effect_source_stats<'a, T: StatTrait>(
     effect: &GameplayEffect<T>,
     entity: Entity,
-    stats_query: &'a mut Query<&mut GameplayStats<T>>,
+    stats_query: &'a Query<&mut GameplayStats<T>>,
 ) -> Option<&'a GameplayStats<T>> {
     match &effect.magnitude {
-        EffectMagnitude::NonlocalStat(_, _, source_entity) => {
-            if let Ok(stats) = stats_query.get(*source_entity) {
-                return Some(stats);
-            } else {
-                return None;
-            }
-        }
-        EffectMagnitude::LocalStat(..) => return stats_query.get(entity).ok(),
-        _ => return None,
-    };
+        EffectMagnitude::NonlocalStat(_, _, source_entity) => stats_query.get(*source_entity).ok(),
+        EffectMagnitude::LocalStat(..) => stats_query.get(entity).ok(),
+        _ => None,
+    }
 }

@@ -20,16 +20,10 @@ stats! (
     }
 );
 
-/// Unfortunately we have to feed in the variants as an array
-/// since rust can't infer them at compile time.
-const VARIANTS: [CharacterStats; 3] = [
-    CharacterStats::Health,
-    CharacterStats::HealthRegen,
-    CharacterStats::Strength
-];
 
 #[derive(Resource)]
 struct Tags {
+    #[allow(dead_code)]
     on_fire_tag: TagId,
     healing_tag: TagId,
 }
@@ -124,7 +118,7 @@ fn do_some_effects(
 
 fn check_deaths(
     mut commands: Commands,
-    mut events: EventReader<OnBoundsBreached<CharacterStats>>,
+    mut events: MessageReader<OnBoundsBreached<CharacterStats>>,
     tags: Res<Tags>,
 ) {
     // Since all entities are receiving the same damage each frame they will all die

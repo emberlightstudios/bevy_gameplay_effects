@@ -88,7 +88,7 @@ impl ActiveTags {
     }
 
     pub fn add(&mut self, tag: TagId) {
-        if !self.iter().any(|&t| t == tag) {
+        if !self.contains(&tag) {
             self.push(tag);
         }
     }
@@ -147,7 +147,7 @@ pub(crate) fn add_effect<T: StatTrait>(
     } = &event.0;
 
     if let Ok((entity, mut effects, mut tags)) = active_effects.get_mut(*target_entity) {
-        let source = get_effect_source_stats(effect, entity, &mut stats_query);
+        let source = get_effect_source_stats(effect, entity, &stats_query);
         let amount = get_effect_amount(effect, source);
 
         if !matches!(effect.duration, EffectDuration::Immediate) {
@@ -303,7 +303,7 @@ pub(crate) fn process_active_effects<T: StatTrait>(
             // Now apply effects for this frame
             for (idx, effect) in effects.0.iter().enumerate() {
                 // Get effect magnitude
-                let source = get_effect_source_stats(effect, entity, &mut stats_query);
+                let source = get_effect_source_stats(effect, entity, &stats_query);
                 if matches!(effect.magnitude, EffectMagnitude::NonlocalStat(..)) && source.is_none()
                 {
                     // Source entity gone
@@ -316,44 +316,36 @@ pub(crate) fn process_active_effects<T: StatTrait>(
                 }
 
                 // Check for expiration timers
-                if let Some(timer) = effect.get_duration_timer() {
-                    if timer.finished() {
-                        removed.push(idx);
-                    }
+                if let Some(timer) = effect.get_duration_timer()
+                    && timer.finished()
+                {
+                    removed.push(idx);
                 }
 
                 // Persistent and immediate effects are already applied
                 let apply = match effect.duration {
-                    EffectDuration::Repeating(period, _) => {
-                        if period.just_triggered() {
-                            periodic_event_writer.write(OnRepeatingEffectTriggered(
-                                EffectMetadata::new(entity, effect.tag, None),
-                            ));
-                            true
-                        } else {
-                            false
-                        }
+                    EffectDuration::Repeating(period, _) if period.just_triggered() => {
+                        periodic_event_writer.write(OnRepeatingEffectTriggered(
+                            EffectMetadata::new(entity, effect.tag, None),
+                        ));
+                        true
                     }
                     EffectDuration::Continuous(_) => true,
                     _ => false,
                 };
-                if apply {
-                    if let Some(event) =
+                if apply && let Some(event) =
                         apply_immediate(entity, effect, &mut stats_query, amount, &effects)
-                    {
-                        breached_writer.write(event);
-                    }
+                {
+                    breached_writer.write(event);
                 }
             }
 
             for &i in removed.iter().rev() {
                 let effect = effects.0.remove(i);
-                if matches!(effect.duration, EffectDuration::Persistent(_)) {
-                    if let Some(e) =
+                if matches!(effect.duration, EffectDuration::Persistent(_)) && let Some(e) =
                         recalculate_stats(entity, &effects, effect.stat_target, &mut stats_query)
-                    {
-                        breached_writer.write(e);
-                    }
+                {
+                    breached_writer.write(e);
                 }
                 if let Some(tag) = effect.tag {
                     tags.remove(tag);
