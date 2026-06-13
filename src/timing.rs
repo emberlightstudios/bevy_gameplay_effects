@@ -1,4 +1,3 @@
-
 #[derive(Clone, PartialEq)]
 pub enum EffectDuration {
     Immediate,
@@ -40,6 +39,14 @@ pub struct RepeatingSmallTimer {
 }
 
 impl RepeatingSmallTimer {
+    pub fn new(period: f32, initial_delay: f32) -> Self {
+        Self {
+            period,
+            remaining: initial_delay,
+            triggered: false,
+        }
+    }
+
     pub(crate) fn tick(&mut self, secs: f32) {
         self.remaining -= secs;
         if self.remaining <= 0. {
@@ -53,20 +60,5 @@ impl RepeatingSmallTimer {
 
     pub(crate) fn just_triggered(&self) -> bool {
         self.triggered
-    }
-
-    pub fn set_duration(&mut self, timer: impl Into<RepeatingSmallTimer>) {
-        self.remaining = timer.into().remaining;
-    }
-}
-
-impl From<f32> for RepeatingSmallTimer {
-    fn from(value: f32) -> Self {
-        // We want the effect to start soon after being triggered
-        // If it's a 10 second trigger we don't want to wait 10s
-        // before the first trigger.  On the other hand we don't 
-        // want to tick the timer immediately if it starts at 0.
-        // I'm arbitrarily putting a 1s delay
-        Self { period: 1., remaining: value, triggered: false }
     }
 }
