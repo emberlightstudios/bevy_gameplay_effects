@@ -9,8 +9,8 @@ use bevy::prelude::*;
 use bevy_hierarchical_tags::prelude::*;
 use smallvec::SmallVec;
 
-const ACTIVE_EFFECTS_SIZE: usize = 24;
-const ACTIVE_TAGS_SIZE: usize = 32;
+const ACTIVE_EFFECTS_SIZE: usize = 32;
+const ACTIVE_TAGS_SIZE: usize = 16;
 
 #[derive(Clone)]
 pub struct GameplayEffect<T: StatTrait> {
