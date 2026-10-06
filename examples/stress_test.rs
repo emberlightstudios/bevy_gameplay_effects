@@ -1,24 +1,22 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
-use bevy_hierarchical_tags::prelude::*;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use bevy::window::PresentMode;
 use bevy_gameplay_effects::prelude::*;
+use bevy_hierarchical_tags::prelude::*;
 
 // Unfortunately effect systems are single threaded due to borrow issues
 // but performance is still decent.
 
 const ENTITIES_TO_SPAWN: usize = 150_000;
 
-stats! (
-    CharacterStats {
-        Health,
-        HealthRegen,
-        Strength,
-    }
-);
+stats!(CharacterStats {
+    Health,
+    HealthRegen,
+    Strength,
+});
 
 #[derive(Resource)]
 struct Tags {
@@ -33,10 +31,13 @@ fn main() {
     let on_fire_tag = tag_registry.register("Effect.Status.Burning");
     let healing_tag = tag_registry.register("Effect.Status.Healing");
     app.insert_resource(tag_registry);
-    app.insert_resource(Tags{ on_fire_tag, healing_tag });
+    app.insert_resource(Tags {
+        on_fire_tag,
+        healing_tag,
+    });
 
     let stacking_behaviors = StackingBehaviors::new()
-        .stack(on_fire_tag, StackingPolicy::NoStackingResetDuration) 
+        .stack(on_fire_tag, StackingPolicy::NoStackingResetDuration)
         .stack(healing_tag, StackingPolicy::MultipleEffects(2)); // Can stack up to 2 healing effects
 
     app.add_plugins((
@@ -55,44 +56,34 @@ fn main() {
     ));
 
     app.add_systems(Startup, spawn_entities);
-    app.add_systems(Update, (
-        do_some_effects
-            .run_if(on_timer(Duration::from_millis(500))),
-        check_deaths,
-    ));
+    app.add_systems(
+        Update,
+        (
+            do_some_effects.run_if(on_timer(Duration::from_millis(500))),
+            check_deaths,
+        ),
+    );
 
     app.run();
 }
 
 fn spawn_entities(mut commands: Commands) {
-    let active_effects = ActiveEffects::new([
-        GameplayEffect::new(
-            None,
-            CharacterStats::Health,
-            EffectMagnitude::Fixed(0.),
-            EffectCalculation::LowerBound,
-            EffectDuration::Persistent(None),
-        ),
-    ]);
-    let stats = GameplayStats::new(
-        |stat| {
-            match stat {
-                CharacterStats::Health => 100.,
-                CharacterStats::HealthRegen => 1.,
-                CharacterStats::Strength => 5.,
-                CharacterStats::None =>  unreachable!() 
-            }
-        }
-    );
+    let active_effects = ActiveEffects::new([GameplayEffect::new(
+        None,
+        CharacterStats::Health,
+        EffectMagnitude::Fixed(0.),
+        EffectCalculation::LowerBound,
+        EffectDuration::Persistent(None),
+    )]);
+    let stats = GameplayStats::new(|stat| match stat {
+        CharacterStats::Health => 100.,
+        CharacterStats::HealthRegen => 1.,
+        CharacterStats::Strength => 5.,
+        CharacterStats::None => unreachable!(),
+    });
 
-    commands.spawn_batch((0..ENTITIES_TO_SPAWN).map(
-        move |_| {
-            (
-                stats.clone(),
-                active_effects.clone(),
-            )
-        })
-    );
+    commands
+        .spawn_batch((0..ENTITIES_TO_SPAWN).map(move |_| (stats.clone(), active_effects.clone())));
 }
 
 fn do_some_effects(
@@ -103,7 +94,13 @@ fn do_some_effects(
     let damage_effect = GameplayEffect::new(
         Some(tags.on_fire_tag),
         CharacterStats::Health,
-        EffectMagnitude::LocalStat(CharacterStats::Strength, StatScalingParams{multiplier: -1.0, ..default()}),
+        EffectMagnitude::LocalStat(
+            CharacterStats::Strength,
+            StatScalingParams {
+                multiplier: -1.0,
+                ..default()
+            },
+        ),
         EffectCalculation::Additive,
         EffectDuration::Immediate,
     );
@@ -111,7 +108,9 @@ fn do_some_effects(
     for entity in entities {
         // Take some damage
         commands.trigger(AddEffect(AddEffectData::new(
-            entity, damage_effect.clone(), None
+            entity,
+            damage_effect.clone(),
+            None,
         )));
     }
 }
@@ -135,9 +134,14 @@ fn check_deaths(
         EffectDuration::Continuous(Some(5.0.into())),
     );
     for event in events.read() {
-        if event.0.stat == CharacterStats::Health && event.0.bound == EffectCalculation::LowerBound {
+        if event.0.stat == CharacterStats::Health && event.0.bound == EffectCalculation::LowerBound
+        {
             // Oh no entity died, let's heal him!
-            commands.trigger(AddEffect(AddEffectData::new(event.target_entity, healing_effect.clone(), None)));
+            commands.trigger(AddEffect(AddEffectData::new(
+                event.target_entity,
+                healing_effect.clone(),
+                None,
+            )));
         }
     }
 }

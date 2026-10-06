@@ -1,9 +1,9 @@
 use crate::{
+    StackingBehaviors,
     calculation::{apply_immediate, get_effect_amount, get_effect_source_stats, recalculate_stats},
     events::EffectMetadata,
     prelude::*,
     timing::SmallTimer,
-    StackingBehaviors,
 };
 use bevy::prelude::*;
 use bevy_hierarchical_tags::prelude::*;
@@ -333,7 +333,8 @@ pub(crate) fn process_active_effects<T: StatTrait>(
                     EffectDuration::Continuous(_) => true,
                     _ => false,
                 };
-                if apply && let Some(event) =
+                if apply
+                    && let Some(event) =
                         apply_immediate(entity, effect, &mut stats_query, amount, &effects)
                 {
                     breached_writer.write(event);
@@ -342,7 +343,8 @@ pub(crate) fn process_active_effects<T: StatTrait>(
 
             for &i in removed.iter().rev() {
                 let effect = effects.0.remove(i);
-                if matches!(effect.duration, EffectDuration::Persistent(_)) && let Some(e) =
+                if matches!(effect.duration, EffectDuration::Persistent(_))
+                    && let Some(e) =
                         recalculate_stats(entity, &effects, effect.stat_target, &mut stats_query)
                 {
                     breached_writer.write(e);
