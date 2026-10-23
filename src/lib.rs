@@ -85,7 +85,7 @@ impl<T: StatTrait> Plugin for GameplayEffectsPlugin<T> {
 mod tests {
     use super::*;
     pub(crate) use crate::prelude::*;
-    pub(crate) use bevy::{prelude::*, time::TimePlugin};
+    pub(crate) use bevy::time::TimePlugin;
     use std::time::Duration;
 
     stats!(MyStats {
